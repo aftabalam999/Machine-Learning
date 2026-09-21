@@ -1,0 +1,39 @@
+# Python virtual environments
+.venv/
+venv/
+env/
+.env/
+
+# Python cache and test artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter generated files
+.ipynb_checkpoints/
+
+# IDE and editor files
+.idea/
+.vscode/
+
+# Local environment and secrets
+.env
+*.env
+
+# Machine learning outputs and local data
+data/
+models/
+checkpoints/
+outputs/
+artifacts/
+*.pkl
+*.pickle
+*.joblib
+*.h5
+*.keras
+
+# OS files
+.DS_Store
+Thumbs.db
