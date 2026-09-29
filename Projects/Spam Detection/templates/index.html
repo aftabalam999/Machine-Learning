@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f3ec">
+  <title>Signal Check | Spam Detector</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Signal Check home">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span>signal<span class="brand-light">check</span></span>
+    </a>
+    <span class="model-note"><span class="live-dot"></span> LOCAL CLASSIFIER</span>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">A clearer read on your inbox</p>
+      <h1 id="page-title">Pause before<br><em>you click.</em></h1>
+      <p class="intro-copy">Check a message for spam signals with a model trained on labeled email examples.</p>
+    </section>
+
+    <section class="checker" aria-label="Message spam checker">
+      <div class="checker-heading">
+        <div>
+          <p class="eyebrow">Message check</p>
+          <h2>What did you receive?</h2>
+        </div>
+        <span class="step-number">01 <span>/ 01</span></span>
+      </div>
+
+      <form method="post" action="/">
+        <label for="message">Paste the email or text message</label>
+        <textarea id="message" name="message" maxlength="5000" required placeholder="Paste a suspicious message here...">{{ message }}</textarea>
+        <div class="form-foot">
+          <span class="input-hint">Up to 5,000 characters</span>
+          <button type="submit">Check message</button>
+        </div>
+      </form>
+
+      {% if error %}
+      <div class="notice notice-error" role="alert">{{ error }}</div>
+      {% endif %}
+
+      {% if result == "spam" %}
+      <div class="result result-spam" role="status" aria-live="polite">
+        <span class="result-icon" aria-hidden="true">!</span>
+        <div>
+          <p class="result-label">Likely spam</p>
+          <p class="result-copy">This message resembles patterns found in spam. Avoid links and requests for personal details.</p>
+        </div>
+      </div>
+      {% elif result == "not_spam" %}
+      <div class="result result-ham" role="status" aria-live="polite">
+        <span class="result-icon" aria-hidden="true">✓</span>
+        <div>
+          <p class="result-label">Likely not spam</p>
+          <p class="result-copy">The message looks more like ordinary email, but keep checking the sender and any links.</p>
+        </div>
+      </div>
+      {% endif %}
+    </section>
+
+    <footer class="page-footer">
+      <span>Signal Check <span class="footer-divider">/</span> Spam screening</span>
+      <span>Predictions are a guide, not a guarantee.</span>
+    </footer>
+  </main>
+</body>
+</html>
