@@ -15,6 +15,7 @@ app = Flask(
     template_folder=str(BASE_DIR / "templates"),
     static_folder=str(BASE_DIR / "static"),
 )
+
 DATA_PATH = BASE_DIR / "house_rent.csv"
 
 FEATURE_ORDER = [
@@ -27,7 +28,6 @@ FEATURE_ORDER = [
     "floor",
     "property_age",
 ]
-
 
 def load_model():
     df = pd.read_csv(DATA_PATH)
@@ -52,7 +52,6 @@ def load_model():
     model.fit(X_train, y_train)
 
     return model, encoders
-
 
 MODEL, ENCODERS = load_model()
 

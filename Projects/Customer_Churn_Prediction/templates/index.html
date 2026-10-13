@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RetainX AI | Telecom Customer Churn Prediction & Retention Engine</title>
+  <meta name="description" content="AI-powered customer churn prediction web application using Logistic Regression. Real-time probability scoring, mathematical feature contribution analysis, and prescriptive retention recommendations.">
+  
+  <!-- Modern Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <!-- Ambient Glowing Background Orbs -->
+  <div class="ambient-bg" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="app-wrapper">
+    <!-- Header & Brand Navigation -->
+    <header class="site-header" role="banner">
+      <div class="brand-container">
+        <div class="brand-icon-wrapper" aria-hidden="true">
+          <!-- Pulse / Retention Shield Icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>RetainX <span class="brand-badge">Logistic Regression</span></h1>
+          <p class="brand-subtitle">AI-Powered Telecom Churn Prediction & Risk Attribution Engine</p>
+        </div>
+      </div>
+
+      <div class="header-status-group">
+        <div class="model-pill" title="Model operational and active in memory">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span>Logistic Regression • ROC-AUC 0.841</span>
+        </div>
+        <button id="batchModalBtn" class="header-btn" type="button" aria-haspopup="dialog">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          </svg>
+          <span>Batch Scoring</span>
+        </button>
+        <button id="modelInfoBtn" class="header-btn" type="button" aria-haspopup="dialog" aria-expanded="false">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <span>Model Architecture</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Hero Banner -->
+    <section class="hero-banner" aria-labelledby="heroHeading">
+      <div class="hero-tag">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+        <span>Supervised Classification Intelligence</span>
+      </div>
+      <h2 id="heroHeading" class="hero-title">Predict Subscriber Churn Before It Happens</h2>
+      <p class="hero-description">
+        Assess customer attrition probabilities using a mathematically transparent <span class="highlight-math">Logistic Regression</span> pipeline with one-hot encoding, feature standardizations, and prescriptive retention strategies.
+      </p>
+    </section>
+
+    <!-- Quick-Pick Sample Personas Section -->
+    <section class="sample-presets-section" aria-labelledby="presetsHeading">
+      <div class="presets-header">
+        <span id="presetsHeading" class="presets-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          Quick-Test Customer Profiles
+        </span>
+        <span class="presets-hint">Click any profile to load real customer data & evaluate instantly</span>
+      </div>
+      <div class="sample-chips-grid" id="samplesContainer">
+        {% for sample in samples %}
+        <button class="sample-chip" type="button" data-sample-id="{{ sample.id }}">
+          <div class="sample-chip-top">
+            <span class="sample-name">{{ sample.name }}</span>
+            <span class="sample-badge {{ sample.badge_class }}">{{ sample.badge }}</span>
+          </div>
+          <p class="sample-desc">{{ sample.description }}</p>
+        </button>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- Main Workspace Grid (Form + Output) -->
+    <main class="main-grid" role="main">
+      
+      <!-- Left Column: Customer Form Input -->
+      <section class="glass-card form-card" aria-labelledby="formSectionTitle">
+        <div class="card-header">
+          <h3 id="formSectionTitle" class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            Customer Parameters
+          </h3>
+          <div class="form-header-actions">
+            <button id="randomBtn" class="header-btn" type="button" title="Randomize values">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span>Random</span>
+            </button>
+            <button id="resetBtn" class="header-btn" type="button" title="Reset form">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              <span>Reset</span>
+            </button>
+          </div>
+        </div>
+
+        <form id="churnForm" class="customer-form" novalidate>
+          
+          <!-- Category 1: Demographics & Account -->
+          <div class="form-section">
+            <div class="section-badge-title">
+              <span class="step-num">1</span>
+              <span>Demographics & Account</span>
+            </div>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="gender" class="form-label">Gender</label>
+                <div class="select-wrapper">
+                  <select id="gender" name="gender" class="form-select">
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="SeniorCitizen" class="form-label">Senior Citizen (65+)</label>
+                <div class="select-wrapper">
+                  <select id="SeniorCitizen" name="SeniorCitizen" class="form-select">
+                    <option value="0">No (Younger Adult)</option>
+                    <option value="1">Yes (Senior Citizen)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="Partner" class="form-label">Partner / Spouse</label>
+                <div class="select-wrapper">
+                  <select id="Partner" name="Partner" class="form-select">
+                    <option value="No">No Partner</option>
+                    <option value="Yes">Has Partner</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="Dependents" class="form-label">Dependents / Family</label>
+                <div class="select-wrapper">
+                  <select id="Dependents" name="Dependents" class="form-select">
+                    <option value="No">No Dependents</option>
+                    <option value="Yes">Has Dependents</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category 2: Connectivity & Security Services -->
+          <div class="form-section">
+            <div class="section-badge-title">
+              <span class="step-num">2</span>
+              <span>Connectivity & Security Services</span>
+            </div>
+            
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label for="PhoneService" class="form-label">Phone Service</label>
+                <div class="select-wrapper">
+                  <select id="PhoneService" name="PhoneService" class="form-select">
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="MultipleLines" class="form-label">Multiple Lines</label>
+                <div class="select-wrapper">
+                  <select id="MultipleLines" name="MultipleLines" class="form-select">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No phone service">No Phone Service</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="InternetService" class="form-label highlight-label">Internet Service</label>
+                <div class="select-wrapper">
+                  <select id="InternetService" name="InternetService" class="form-select">
+                    <option value="Fiber optic">Fiber Optic (Fastest)</option>
+                    <option value="DSL">DSL (Broadband)</option>
+                    <option value="No">No Internet Service</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Value Add Services Grid -->
+            <div class="services-subgrid">
+              <div class="form-group">
+                <label for="OnlineSecurity" class="form-label">Online Security</label>
+                <div class="select-wrapper">
+                  <select id="OnlineSecurity" name="OnlineSecurity" class="form-select">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No internet service">No Internet</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="OnlineBackup" class="form-label">Online Backup</label>
+                <div class="select-wrapper">
+                  <select id="OnlineBackup" name="OnlineBackup" class="form-select">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No internet service">No Internet</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="DeviceProtection" class="form-label">Device Protection</label>
+                <div class="select-wrapper">
+                  <select id="DeviceProtection" name="DeviceProtection" class="form-select">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No internet service">No Internet</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="TechSupport" class="form-label highlight-label">Tech Support</label>
+                <div class="select-wrapper">
+                  <select id="TechSupport" name="TechSupport" class="form-select">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No internet service">No Internet</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="StreamingTV" class="form-label">Streaming TV</label>
+                <div class="select-wrapper">
+                  <select id="StreamingTV" name="StreamingTV" class="form-select">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No internet service">No Internet</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="StreamingMovies" class="form-label">Streaming Movies</label>
+                <div class="select-wrapper">
+                  <select id="StreamingMovies" name="StreamingMovies" class="form-select">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No internet service">No Internet</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category 3: Contract & Billing -->
+          <div class="form-section">
+            <div class="section-badge-title">
+              <span class="step-num">3</span>
+              <span>Contract & Billing Terms</span>
+            </div>
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label for="Contract" class="form-label highlight-label">Contract Type</label>
+                <div class="select-wrapper">
+                  <select id="Contract" name="Contract" class="form-select">
+                    <option value="Month-to-month">Month-to-month (High Risk)</option>
+                    <option value="One year">One year</option>
+                    <option value="Two year">Two year (Safest)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="PaperlessBilling" class="form-label">Paperless Invoicing</label>
+                <div class="select-wrapper">
+                  <select id="PaperlessBilling" name="PaperlessBilling" class="form-select">
+                    <option value="Yes">Yes (Paperless)</option>
+                    <option value="No">No (Paper Mail)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="PaymentMethod" class="form-label">Payment Method</label>
+                <div class="select-wrapper">
+                  <select id="PaymentMethod" name="PaymentMethod" class="form-select">
+                    <option value="Electronic check">Electronic Check</option>
+                    <option value="Mailed check">Mailed Check</option>
+                    <option value="Bank transfer (automatic)">Bank Transfer (Auto)</option>
+                    <option value="Credit card (automatic)">Credit Card (Auto)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category 4: Financials & Tenure (Interactive Sliders) -->
+          <div class="form-section">
+            <div class="section-badge-title">
+              <span class="step-num">4</span>
+              <span>Tenure & Financial Details</span>
+            </div>
+
+            <!-- Tenure Slider -->
+            <div class="slider-control-group">
+              <div class="slider-label-row">
+                <label for="tenureInput" class="form-label">
+                  Tenure (Months as Customer)
+                  <span class="tenure-years-hint" id="tenureYearsHint">(0.2 years)</span>
+                </label>
+                <div class="number-input-wrap">
+                  <input type="number" id="tenureInput" name="tenure" min="0" max="72" value="2" class="form-number-input">
+                  <span class="unit-tag">mo</span>
+                </div>
+              </div>
+              <input type="range" id="tenureSlider" min="0" max="72" value="2" class="form-range-slider">
+              <div class="slider-ticks">
+                <span>0 mo (New)</span>
+                <span>24 mo (2 yrs)</span>
+                <span>48 mo (4 yrs)</span>
+                <span>72 mo (6 yrs)</span>
+              </div>
+            </div>
+
+            <!-- Monthly Charges Slider -->
+            <div class="slider-control-group">
+              <div class="slider-label-row">
+                <label for="monthlyChargesInput" class="form-label">Monthly Bill Amount</label>
+                <div class="number-input-wrap">
+                  <span class="currency-prefix">$</span>
+                  <input type="number" id="monthlyChargesInput" name="MonthlyCharges" min="18" max="120" step="0.05" value="89.85" class="form-number-input">
+                  <span class="unit-tag">/mo</span>
+                </div>
+              </div>
+              <input type="range" id="monthlyChargesSlider" min="18" max="120" step="0.25" value="89.85" class="form-range-slider">
+              <div class="slider-ticks">
+                <span>$18.00 (Min)</span>
+                <span>$50.00</span>
+                <span>$85.00</span>
+                <span>$120.00 (Max)</span>
+              </div>
+            </div>
+
+            <!-- Total Charges Input with Auto Sync -->
+            <div class="total-charges-row">
+              <div class="form-group flex-1">
+                <label for="totalChargesInput" class="form-label">
+                  Total Charges Lifetime ($)
+                </label>
+                <div class="number-input-wrap full-width">
+                  <span class="currency-prefix">$</span>
+                  <input type="number" id="totalChargesInput" name="TotalCharges" min="0" max="9999" step="0.05" value="179.70" class="form-number-input">
+                </div>
+              </div>
+              <button id="syncTotalChargesBtn" class="sync-btn" type="button" title="Calculate Total = Tenure × Monthly">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span>Auto-Calc</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Category 5: Decision Threshold Sensitivity -->
+          <div class="form-section threshold-section">
+            <div class="section-badge-title">
+              <span class="step-num">5</span>
+              <span>Decision Threshold Sensitivity</span>
+            </div>
+            <div class="threshold-description">
+              Adjust cutoff probability (default 0.50). Lower values flag at-risk subscribers earlier for aggressive retention outreach.
+            </div>
+            <div class="slider-control-group">
+              <div class="slider-label-row">
+                <span class="threshold-current-label">Active Cutoff: <strong id="thresholdDisplay">0.50</strong></span>
+                <span id="thresholdStrategyBadge" class="strategy-badge">Balanced (Standard)</span>
+              </div>
+              <input type="range" id="thresholdSlider" name="threshold" min="0.10" max="0.90" step="0.05" value="0.50" class="form-range-slider threshold-slider">
+              <div class="slider-ticks">
+                <span>0.10 (High Sensitivity)</span>
+                <span>0.50 (Standard)</span>
+                <span>0.90 (High Specificity)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="submit-action-row">
+            <button id="predictBtn" type="submit" class="submit-btn primary-glow">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span>Analyze Churn Risk Now</span>
+            </button>
+          </div>
+
+        </form>
+      </section>
+
+      <!-- Right Column: Prediction Results & Intelligence Dashboard -->
+      <section class="results-column" aria-labelledby="resultsSectionTitle">
+        <div class="glass-card results-card" id="resultsCard">
+          
+          <div class="card-header">
+            <h3 id="resultsSectionTitle" class="card-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              Churn Risk Intelligence
+            </h3>
+            <span class="live-status-pill" id="liveStatusPill">
+              <span class="pulse-dot-green"></span>
+              <span>Model In Sync</span>
+            </span>
+          </div>
+
+          <!-- Initial Loading State Placeholder -->
+          <div id="resultsLoading" class="loading-state hidden">
+            <div class="spinner"></div>
+            <p>Evaluating customer features through Logistic Regression pipeline...</p>
+          </div>
+
+          <!-- Main Results Display -->
+          <div id="resultsContent" class="results-body">
+            
+            <!-- Result Badge & Status Header -->
+            <div class="risk-banner" id="riskBanner">
+              <div class="risk-badge-pill" id="riskBadgePill">
+                <span id="riskBadgeText">CRITICAL CHURN RISK</span>
+              </div>
+              <h4 class="risk-tier-title" id="riskTierTitle">High Probability of Churn</h4>
+              <p class="risk-explanation" id="riskExplanation">
+                Based on current subscription terms and service usage, this customer exhibits strong churn indicators.
+              </p>
+            </div>
+
+            <!-- Gauge & Metric Probability Display -->
+            <div class="metrics-visual-grid">
+              
+              <!-- Circular Probability Gauge -->
+              <div class="gauge-card">
+                <div class="gauge-container">
+                  <svg class="gauge-svg" viewBox="0 0 120 120">
+                    <circle class="gauge-bg" cx="60" cy="60" r="50"></circle>
+                    <circle class="gauge-fill" id="gaugeCircle" cx="60" cy="60" r="50" stroke-dasharray="314.15" stroke-dashoffset="60"></circle>
+                  </svg>
+                  <div class="gauge-center-content">
+                    <span class="gauge-number" id="churnPercentageText">89.8%</span>
+                    <span class="gauge-label">Churn Prob.</span>
+                  </div>
+                </div>
+                <div class="probability-split-row">
+                  <div class="prob-chip churn-chip">
+                    <span class="dot dot-red"></span>
+                    <span>Churn: <strong id="churnProbRaw">0.898</strong></span>
+                  </div>
+                  <div class="prob-chip retain-chip">
+                    <span class="dot dot-green"></span>
+                    <span>Retain: <strong id="retainProbRaw">0.102</strong></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Key Impact Statistics -->
+              <div class="stat-boxes-grid">
+                <div class="stat-box">
+                  <span class="stat-box-label">Annual Revenue at Risk</span>
+                  <span class="stat-box-value risk-val" id="statRevenueRisk">$1,078.20</span>
+                  <span class="stat-box-sub">12-mo projected billing loss</span>
+                </div>
+                <div class="stat-box">
+                  <span class="stat-box-label">Inference Latency</span>
+                  <span class="stat-box-value" id="statLatency">1.4 ms</span>
+                  <span class="stat-box-sub">Real-time linear execution</span>
+                </div>
+                <div class="stat-box">
+                  <span class="stat-box-label">Applied Cutoff</span>
+                  <span class="stat-box-value" id="statThreshold">0.50</span>
+                  <span class="stat-box-sub">Risk decision boundary</span>
+                </div>
+                <div class="stat-box">
+                  <span class="stat-box-label">Model Confidence</span>
+                  <span class="stat-box-value" id="statConfidence">High</span>
+                  <span class="stat-box-sub">Sigmoid distance from zero</span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Mathematical Feature Impact Breakdown (Explainable AI) -->
+            <div class="explainability-section">
+              <div class="section-title-row">
+                <h5>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                  Explainable AI: Key Factor Attribution
+                </h5>
+                <span class="math-formula-tag" title="Logit contribution z_i = weight * standardized feature">
+                  z = w &times; x
+                </span>
+              </div>
+              <p class="explain-intro">
+                Logistic Regression mathematically isolates the exact contribution of each feature towards either customer churn or retention.
+              </p>
+
+              <!-- Two columns: Churn Drivers vs Retention Drivers -->
+              <div class="attribution-columns-grid">
+                
+                <!-- Churn Drivers (Pushes towards Churn) -->
+                <div class="driver-card churn-driver-card">
+                  <div class="driver-header">
+                    <span class="driver-icon red-icon">▲</span>
+                    <span>Top Churn Drivers (Risk Factors)</span>
+                  </div>
+                  <div class="driver-list" id="churnDriversList">
+                    <!-- Populated dynamically -->
+                  </div>
+                </div>
+
+                <!-- Retention Drivers (Pushes towards Retention) -->
+                <div class="driver-card retain-driver-card">
+                  <div class="driver-header">
+                    <span class="driver-icon green-icon">▼</span>
+                    <span>Top Retention Anchors (Protectors)</span>
+                  </div>
+                  <div class="driver-list" id="retainDriversList">
+                    <!-- Populated dynamically -->
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Prescriptive Retention Actions -->
+            <div class="recommendations-section">
+              <div class="section-title-row">
+                <h5>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  Prescriptive Retention Interventions
+                </h5>
+                <span class="action-tag">Recommended Next Steps</span>
+              </div>
+              <div class="recommendations-list" id="recommendationsList">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+            <!-- Bottom Actions -->
+            <div class="results-actions-footer">
+              <button id="copyReportBtn" class="footer-btn" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span>Copy Summary Report</span>
+              </button>
+              <button id="downloadJsonBtn" class="footer-btn" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Export JSON</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+      <div class="footer-content">
+        <p>RetainX AI • Built with Flask, Vanilla CSS & Scikit-Learn Logistic Regression</p>
+        <p class="footer-sub">Trained on IBM Telco Customer Churn Dataset • Evaluated on 7,043 Real Customer Records</p>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Modal 1: Model Architecture & Evaluation Stats -->
+  <div id="modelModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modelModalTitle">
+    <div class="modal-glass-container">
+      <div class="modal-header">
+        <h3 id="modelModalTitle" class="modal-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          Logistic Regression Architecture & Performance
+        </h3>
+        <button id="closeModelModalBtn" class="modal-close-btn" type="button" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- Algorithm Specs -->
+        <div class="specs-grid">
+          <div class="spec-card">
+            <span class="spec-label">Algorithm</span>
+            <span class="spec-value">Logistic Regression</span>
+          </div>
+          <div class="spec-card">
+            <span class="spec-label">Class Weighting</span>
+            <span class="spec-value">Balanced (Penalizes Imbalance)</span>
+          </div>
+          <div class="spec-card">
+            <span class="spec-label">Solver & Max Iter</span>
+            <span class="spec-value">lbfgs / 2,000 max iter</span>
+          </div>
+          <div class="spec-card">
+            <span class="spec-label">ROC-AUC Score</span>
+            <span class="spec-value highlight-cyan">0.841</span>
+          </div>
+        </div>
+
+        <!-- Metric Badges Table -->
+        <div class="modal-section-box">
+          <h4 class="modal-subheading">Test Set Performance Benchmarks</h4>
+          <div class="metrics-table-grid">
+            <div class="metric-cell">
+              <span class="metric-cell-val">73.8%</span>
+              <span class="metric-cell-lbl">Accuracy</span>
+            </div>
+            <div class="metric-cell">
+              <span class="metric-cell-val">78.3%</span>
+              <span class="metric-cell-lbl">Churn Recall</span>
+            </div>
+            <div class="metric-cell">
+              <span class="metric-cell-val">50.4%</span>
+              <span class="metric-cell-lbl">Precision</span>
+            </div>
+            <div class="metric-cell">
+              <span class="metric-cell-val">0.614</span>
+              <span class="metric-cell-lbl">F1-Score</span>
+            </div>
+            <div class="metric-cell">
+              <span class="metric-cell-val">0.841</span>
+              <span class="metric-cell-lbl">ROC-AUC</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preprocessing Pipeline Details -->
+        <div class="modal-section-box">
+          <h4 class="modal-subheading">Scikit-Learn Preprocessing Pipeline</h4>
+          <ul class="pipeline-steps-list">
+            <li>
+              <strong>Numeric Features (4):</strong> Imputed with <code>SimpleImputer(strategy='median')</code> & standardized via <code>StandardScaler()</code> to prevent feature scale distortion.
+            </li>
+            <li>
+              <strong>Categorical Features (15):</strong> Imputed with <code>SimpleImputer(strategy='most_frequent')</code> & expanded into 41 binary indicator columns via <code>OneHotEncoder(handle_unknown='ignore')</code>.
+            </li>
+            <li>
+              <strong>Total Feature Space:</strong> 45 total transformed model dimensions feeding into the Logistic Regression estimator.
+            </li>
+          </ul>
+        </div>
+
+        <!-- Top Global Model Weights -->
+        <div class="modal-section-box">
+          <h4 class="modal-subheading">Top Global Model Coefficients</h4>
+          <div class="weights-split-grid" id="globalWeightsContainer">
+            <div class="weights-subcol">
+              <span class="weights-header red">Highest Churn Coefficients (+)</span>
+              <div id="globalChurnWeightsList" class="weights-list">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+            <div class="weights-subcol">
+              <span class="weights-header green">Highest Retention Coefficients (-)</span>
+              <div id="globalRetainWeightsList" class="weights-list">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Batch CSV Scoring Modal -->
+  <div id="batchModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="batchModalTitle">
+    <div class="modal-glass-container wide-modal">
+      <div class="modal-header">
+        <h3 id="batchModalTitle" class="modal-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          </svg>
+          Batch Customer CSV Scoring
+        </h3>
+        <button id="closeBatchModalBtn" class="modal-close-btn" type="button" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="upload-dropzone" id="uploadDropzone">
+          <input type="file" id="batchCsvInput" accept=".csv" class="hidden-file-input">
+          <div class="dropzone-content">
+            <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            <p class="dropzone-title">Drag and drop your Customer CSV here</p>
+            <p class="dropzone-sub">or <button type="button" id="browseFileBtn" class="browse-link">browse from your computer</button></p>
+            <p class="dropzone-note">Accepts standard Telco customer CSV format. Maximum 200 records scored in batch.</p>
+          </div>
+        </div>
+
+        <!-- Batch Processing Status -->
+        <div id="batchLoading" class="batch-loading hidden">
+          <div class="spinner"></div>
+          <p>Processing batch records with Logistic Regression model...</p>
+        </div>
+
+        <!-- Batch Results Dashboard -->
+        <div id="batchResultsWrapper" class="batch-results-wrapper hidden">
+          <div class="batch-summary-cards">
+            <div class="batch-stat-card">
+              <span class="batch-stat-lbl">Analyzed Customers</span>
+              <span class="batch-stat-num" id="batchTotalAnalyzed">0</span>
+            </div>
+            <div class="batch-stat-card">
+              <span class="batch-stat-lbl">Predicted Churners</span>
+              <span class="batch-stat-num text-danger" id="batchChurnCount">0</span>
+            </div>
+            <div class="batch-stat-card">
+              <span class="batch-stat-lbl">Overall Churn Rate</span>
+              <span class="batch-stat-num text-warning" id="batchChurnRate">0%</span>
+            </div>
+            <div class="batch-stat-card">
+              <span class="batch-stat-lbl">Annual Revenue at Risk</span>
+              <span class="batch-stat-num text-cyan" id="batchRiskRevenue">$0.00</span>
+            </div>
+          </div>
+
+          <!-- Preview Table -->
+          <div class="table-container">
+            <table class="batch-table">
+              <thead>
+                <tr>
+                  <th>Customer ID</th>
+                  <th>Tenure</th>
+                  <th>Contract</th>
+                  <th>Monthly ($)</th>
+                  <th>Churn Probability</th>
+                  <th>Risk Tier</th>
+                  <th>Outcome</th>
+                </tr>
+              </thead>
+              <tbody id="batchTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

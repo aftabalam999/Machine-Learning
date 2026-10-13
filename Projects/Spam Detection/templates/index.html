@@ -1,76 +1,492 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f4f3ec">
-  <title>Signal Check | Spam Detector</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AegisSpam AI | Real-Time Email Spam Classifier & Threat Analyzer</title>
+  <meta name="description" content="AI-powered email spam detection application using Logistic Regression with TF-IDF vectorization. Inspect spam probabilities and discover influential trigger keywords in real-time.">
+  
+  <!-- Modern Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="/" aria-label="Signal Check home">
-      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-      <span>signal<span class="brand-light">check</span></span>
-    </a>
-    <span class="model-note"><span class="live-dot"></span> LOCAL CLASSIFIER</span>
-  </header>
 
-  <main>
-    <section class="intro" aria-labelledby="page-title">
-      <p class="eyebrow">A clearer read on your inbox</p>
-      <h1 id="page-title">Pause before<br><em>you click.</em></h1>
-      <p class="intro-copy">Check a message for spam signals with a model trained on labeled email examples.</p>
+  <!-- Ambient Glowing Background -->
+  <div class="ambient-bg" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="app-wrapper">
+    <!-- Header & Navigation -->
+    <header class="site-header" role="banner">
+      <div class="brand-container">
+        <div class="brand-icon-wrapper" aria-hidden="true">
+          <!-- Shield Radar Icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>AegisSpam <span class="brand-badge">Logistic Regression</span></h1>
+          <p class="brand-subtitle">AI-Powered Email Defense & Keyword Attribution Engine</p>
+        </div>
+      </div>
+
+      <div class="header-status-group">
+        <div class="model-pill" title="Model operational and loaded in memory">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span>Logistic Regression v1.0</span>
+        </div>
+        <button id="modelInfoBtn" class="header-btn" type="button" aria-haspopup="dialog" aria-expanded="false">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <span>Model Architecture</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Hero Introduction -->
+    <section class="hero-banner" aria-labelledby="heroHeading">
+      <div class="hero-tag">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+        <span>High-Precision Text Intelligence</span>
+      </div>
+      <h2 id="heroHeading" class="hero-title">Instant Email Threat & Spam Detection</h2>
+      <p class="hero-description">
+        Classify messages instantly using a mathematically transparent <span class="highlight-math">Logistic Regression</span> classifier trained with TF-IDF n-gram feature weights.
+      </p>
     </section>
 
-    <section class="checker" aria-label="Message spam checker">
-      <div class="checker-heading">
-        <div>
-          <p class="eyebrow">Message check</p>
-          <h2>What did you receive?</h2>
+    <!-- Main Workspace Grid -->
+    <main class="main-grid" role="main">
+      <!-- Left Column: Input Panel -->
+      <section class="glass-card" aria-labelledby="inputSectionTitle">
+        <div class="card-header">
+          <h3 id="inputSectionTitle" class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+            Message Inspector
+          </h3>
+          <div class="textarea-actions">
+            <button id="clearBtn" class="header-btn" type="button" title="Clear text">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+              </svg>
+              <span>Clear</span>
+            </button>
+          </div>
         </div>
-        <span class="step-number">01 <span>/ 01</span></span>
-      </div>
 
-      <form method="post" action="/">
-        <label for="message">Paste the email or text message</label>
-        <textarea id="message" name="message" maxlength="5000" required placeholder="Paste a suspicious message here...">{{ message }}</textarea>
-        <div class="form-foot">
-          <span class="input-hint">Up to 5,000 characters</span>
-          <button type="submit">Check message</button>
+        <!-- Pre-set Samples Quick Pick -->
+        <div class="sample-presets-section">
+          <div class="presets-label">
+            <span>Quick-Test Sample Emails</span>
+            <span>Click to Test</span>
+          </div>
+          <div class="sample-chips-grid" id="samplesContainer">
+            {% for sample in samples %}
+            <button
+              type="button"
+              class="sample-chip"
+              data-sample="{{ sample.text }}"
+              id="chip-{{ sample.id }}"
+              title="{{ sample.text }}"
+            >
+              <span class="chip-tag {{ sample.category }}">{{ sample.category }}</span>
+              <span>{{ sample.title }}</span>
+            </button>
+            {% endfor %}
+          </div>
         </div>
-      </form>
 
-      {% if error %}
-      <div class="notice notice-error" role="alert">{{ error }}</div>
-      {% endif %}
+        <!-- Input Area Form -->
+        <form id="spamForm" method="POST" action="/" onsubmit="return false;">
+          <div class="input-box-wrapper">
+            <textarea
+              id="emailInput"
+              name="message"
+              class="email-textarea"
+              placeholder="Paste email headers, raw text, or suspicious messages here to evaluate with the Logistic Regression model..."
+              aria-label="Email message to analyze"
+              rows="9"
+            >{{ initial_text }}</textarea>
 
-      {% if result == "spam" %}
-      <div class="result result-spam" role="status" aria-live="polite">
-        <span class="result-icon" aria-hidden="true">!</span>
-        <div>
-          <p class="result-label">Likely spam</p>
-          <p class="result-copy">This message resembles patterns found in spam. Avoid links and requests for personal details.</p>
+            <div class="textarea-floating-actions">
+              <button type="button" id="pasteBtn" class="floating-icon-btn" title="Paste from clipboard">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Counter Bar -->
+          <div class="input-meta-bar">
+            <div class="meta-counters">
+              <div class="counter-item">
+                <span>Characters:</span>
+                <span id="charCounter" class="counter-value">0</span>
+              </div>
+              <div class="counter-item">
+                <span>Words:</span>
+                <span id="wordCounter" class="counter-value">0</span>
+              </div>
+              <div class="counter-item">
+                <span>Reading time:</span>
+                <span id="readTimeCounter" class="counter-value">0s</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Threshold Slider Control -->
+          <div class="threshold-control-card">
+            <div class="threshold-header">
+              <label for="thresholdSlider" class="threshold-label">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="4" y1="21" x2="4" y2="14"></line>
+                  <line x1="4" y1="10" x2="4" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12" y2="3"></line>
+                  <line x1="20" y1="21" x2="20" y2="16"></line>
+                  <line x1="20" y1="12" x2="20" y2="3"></line>
+                  <line x1="1" y1="14" x2="7" y2="14"></line>
+                  <line x1="9" y1="8" x2="15" y2="8"></line>
+                  <line x1="17" y1="16" x2="23" y2="16"></line>
+                </svg>
+                Decision Sensitivity Threshold
+              </label>
+              <span id="thresholdDisplay" class="threshold-badge">50%</span>
+            </div>
+            <input
+              type="range"
+              id="thresholdSlider"
+              name="threshold"
+              class="slider-input"
+              min="10"
+              max="90"
+              value="50"
+              step="5"
+              aria-label="Logistic Regression decision threshold percentage"
+            >
+            <div class="slider-labels">
+              <span>Catch More Spam (Aggressive 10%)</span>
+              <span>Balanced (50%)</span>
+              <span>Strict Proof (Conservative 90%)</span>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-buttons-row">
+            <button type="button" id="analyzeBtn" class="btn-primary">
+              <span id="analyzeSpinner" style="display: none;" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="animation: spin 1s linear infinite;">
+                  <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
+                  <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor"></path>
+                </svg>
+              </span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <span id="analyzeBtnText">Analyze Message</span>
+            </button>
+
+            <button type="button" id="clearInputBtn" class="btn-secondary">Clear</button>
+          </div>
+          <p class="keyboard-shortcut-hint">Pro-tip: Press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> or <kbd>⌘</kbd> + <kbd>Enter</kbd> to analyze</p>
+        </form>
+      </section>
+
+      <!-- Right Column: Verdict & Threat Intelligence -->
+      <section class="glass-card" aria-labelledby="resultsSectionTitle">
+        <div class="card-header">
+          <h3 id="resultsSectionTitle" class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            Classification Verdict
+          </h3>
+          <div class="latency-row">
+            <span>Latency:</span>
+            <span id="latencyBadge" style="font-family: var(--font-mono); color: var(--accent-cyan); font-weight: 700;">-- ms</span>
+          </div>
+        </div>
+
+        <div class="verdict-container">
+          <!-- Empty State -->
+          <div id="verdictEmptyState" class="verdict-empty-state">
+            <div class="empty-radar-circle" aria-hidden="true">
+              <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="2" x2="12" y2="12"></line>
+                <circle cx="12" cy="12" r="4"></circle>
+              </svg>
+            </div>
+            <h4 class="empty-title">Ready for Analysis</h4>
+            <p class="empty-text">
+              Type or paste an email message, or select one of the quick test presets to evaluate with Logistic Regression.
+            </p>
+          </div>
+
+          <!-- Active Verdict State -->
+          <div id="verdictActiveState" class="verdict-active-state">
+            <!-- Main Verdict Banner -->
+            <div id="verdictBanner" class="verdict-banner is-ham">
+              <div class="verdict-info-left">
+                <div id="verdictIcon" class="verdict-icon-bubble">
+                  <!-- Injected via JS -->
+                </div>
+                <div>
+                  <h4 id="verdictHeading" class="verdict-heading">LEGITIMATE (HAM)</h4>
+                  <p id="verdictSubheading" class="verdict-subheading">Classified by Logistic Regression at 50% decision boundary</p>
+                </div>
+              </div>
+              <div>
+                <span id="riskBadge" class="risk-level-badge">VERIFIED SAFE</span>
+              </div>
+            </div>
+
+            <!-- Radial Progress Gauge & Probability Breakdowns -->
+            <div class="probability-gauge-section">
+              <div class="gauge-circle-wrapper">
+                <svg class="gauge-svg" viewBox="0 0 100 100">
+                  <circle class="gauge-bg-ring" cx="50" cy="50" r="45"></circle>
+                  <circle id="gaugeProgressRing" class="gauge-progress-ring" cx="50" cy="50" r="45"></circle>
+                </svg>
+                <div class="gauge-center-text">
+                  <span id="gaugeValueText" class="gauge-value">0%</span>
+                  <span class="gauge-caption">Spam Score</span>
+                </div>
+              </div>
+
+              <div class="probability-details-col">
+                <!-- Spam Probability Meter -->
+                <div class="prob-meter-row">
+                  <div class="prob-label-row">
+                    <span class="spam-label-text">Spam Probability</span>
+                    <span id="spamPctLabel" class="prob-pct-number spam-label-text">0.0%</span>
+                  </div>
+                  <div class="meter-track">
+                    <div id="meterFillSpam" class="meter-fill-spam"></div>
+                  </div>
+                </div>
+
+                <!-- Ham Probability Meter -->
+                <div class="prob-meter-row">
+                  <div class="prob-label-row">
+                    <span class="ham-label-text">Legitimate (Ham) Likelihood</span>
+                    <span id="hamPctLabel" class="prob-pct-number ham-label-text">100.0%</span>
+                  </div>
+                  <div class="meter-track">
+                    <div id="meterFillHam" class="meter-fill-ham"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Explainability: Feature Attribution Tokens -->
+            <div class="explainability-section">
+              <div class="explain-header">
+                <h4 class="explain-title">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                  </svg>
+                  Logistic Regression Feature Attribution
+                </h4>
+                <p class="explain-subtitle">
+                  Key words and n-grams pushing the mathematical sigmoid decision boundary:
+                </p>
+              </div>
+
+              <div class="indicators-grid">
+                <!-- Spam Triggers -->
+                <div class="indicator-column">
+                  <div class="column-header spam-col">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <line x1="12" y1="5" x2="12" y2="19"></line>
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Spam Indicators (+Weight)</span>
+                  </div>
+                  <div id="spamChipsList" class="chips-list">
+                    <!-- Populated dynamically -->
+                  </div>
+                </div>
+
+                <!-- Legitimate Signals -->
+                <div class="indicator-column">
+                  <div class="column-header ham-col">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Legitimate Signals (-Weight)</span>
+                  </div>
+                  <div id="hamChipsList" class="chips-list">
+                    <!-- Populated dynamically -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="verdict-actions-footer">
+              <button type="button" id="copyResultBtn" class="action-tool-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span>Copy Summary</span>
+              </button>
+              <button type="button" id="shareReportBtn" class="action-tool-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+                <span>Export Diagnostics JSON</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Recent Session History -->
+    <section class="history-section" aria-labelledby="historyTitle">
+      <div class="history-card">
+        <div class="history-header">
+          <h3 id="historyTitle" class="history-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            Recent Scan History (Session)
+          </h3>
+          <button id="clearHistoryBtn" class="header-btn" type="button">Clear History</button>
+        </div>
+
+        <div class="history-table-wrapper">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th scope="col" style="width: 100px;">Time</th>
+                <th scope="col" style="width: 120px;">Verdict</th>
+                <th scope="col" style="width: 110px;">Probability</th>
+                <th scope="col">Message Preview</th>
+                <th scope="col" style="width: 80px; text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+          <p id="historyEmptyNote" style="text-align: center; color: var(--text-dim); padding: 1.5rem; font-size: 0.85rem;">
+            No scan history yet. Tested emails in this session will appear here.
+          </p>
         </div>
       </div>
-      {% elif result == "not_spam" %}
-      <div class="result result-ham" role="status" aria-live="polite">
-        <span class="result-icon" aria-hidden="true">✓</span>
-        <div>
-          <p class="result-label">Likely not spam</p>
-          <p class="result-copy">The message looks more like ordinary email, but keep checking the sender and any links.</p>
-        </div>
-      </div>
-      {% endif %}
     </section>
 
-    <footer class="page-footer">
-      <span>Signal Check <span class="footer-divider">/</span> Spam screening</span>
-      <span>Predictions are a guide, not a guarantee.</span>
+    <!-- Site Footer -->
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-left">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-cyan);">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        <span>AegisSpam AI Engine &bull; Strictly Powered by <strong>Logistic Regression</strong> with TF-IDF Vectorization</span>
+      </div>
+      <div class="footer-links">
+        <a href="#heroHeading" class="footer-link">Back to Top</a>
+        <a href="javascript:void(0)" id="footerModalLink" onclick="document.getElementById('modelModal').style.display='flex';" class="footer-link">Model Specs</a>
+      </div>
     </footer>
-  </main>
+  </div>
+
+  <!-- Model Architecture Modal -->
+  <div id="modelModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle" class="modal-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-cyan);">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+          </svg>
+          Logistic Regression Architecture
+        </h3>
+        <button id="closeModalBtn" class="modal-close-btn" aria-label="Close dialog">&times;</button>
+      </div>
+
+      <div class="math-formula-box">
+        <div class="formula-display">
+          P(Spam | X) = &sigma;(w&sup0; + &Sigma; wᵢ &middot; xᵢ) = 1 / (1 + e<sup>-(w&sup0; + w<sup>T</sup>x)</sup>)
+        </div>
+        <p class="formula-caption">
+          Sigmoid activation mapping linear weighted TF-IDF combinations to the [0, 1] probability space.
+        </p>
+      </div>
+
+      <div class="specs-grid">
+        <div class="spec-item">
+          <div class="spec-label">Machine Learning Algorithm</div>
+          <div class="spec-value">Logistic Regression (Logit)</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">Feature Extraction</div>
+          <div class="spec-value">TF-IDF Vectorizer (1-2 N-grams)</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">Max Vocabulary Size</div>
+          <div class="spec-value">20,000 Features</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">Optimization Solver</div>
+          <div class="spec-value">lbfgs (L2 Regularization, C=1.0)</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">Dataset Volume</div>
+          <div class="spec-value">100,000 Verified Messages</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">Class Split</div>
+          <div class="spec-value">50,000 Ham / 50,000 Spam</div>
+        </div>
+      </div>
+
+      <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
+        Unlike opaque black-box models, Logistic Regression offers 100% mathematical explainability. Each token’s coefficient directly reflects whether it increases (positive weight) or decreases (negative weight) the likelihood that an email is spam.
+      </p>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Server data bootstrap if rendered from POST -->
+  {% if initial_result %}
+  <script id="initialDataPayload" type="application/json">
+    {{ initial_result | tojson | safe }}
+  </script>
+  {% endif %}
+
+  <!-- Client Application Script -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
