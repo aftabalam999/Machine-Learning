@@ -1,100 +1,368 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>House Rent Prediction</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Accurate AI-powered House Rent Prediction using Linear Regression. Predict monthly rent across major Indian cities based on property specifications.">
+    <meta name="author" content="Machine Learning House Rent Predictor">
+    <title>House Rent Predictor | Linear Regression Machine Learning Model</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h1>House Rent Predictor</h1>
-
-        <form method="POST" action="/">
-            <div class="grid">
-                <div class="field">
-                    <label for="city">City</label>
-                    <select id="city" name="city" required>
-                        <option value="">Select city</option>
-                        <option value="Ahmedabad">Ahmedabad</option>
-                        <option value="Bangalore">Bangalore</option>
-                        <option value="Chennai">Chennai</option>
-                        <option value="Delhi">Delhi</option>
-                        <option value="Hyderabad">Hyderabad</option>
-                        <option value="Kolkata">Kolkata</option>
-                        <option value="Mumbai">Mumbai</option>
-                        <option value="Pune">Pune</option>
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label for="bhk">BHK</label>
-                    <input type="number" id="bhk" name="bhk" min="1" max="10" required />
-                </div>
-
-                <div class="field">
-                    <label for="size_sqft">Size (sqft)</label>
-                    <input type="number" id="size_sqft" name="size_sqft" step="0.01" min="200" required />
-                </div>
-
-                <div class="field">
-                    <label for="bathrooms">Bathrooms</label>
-                    <input type="number" id="bathrooms" name="bathrooms" min="1" max="10" step="0.5" required />
-                </div>
-
-                <div class="field">
-                    <label for="property_type">Property Type</label>
-                    <select id="property_type" name="property_type" required>
-                        <option value="">Select property type</option>
-                        <option value="Apartment">Apartment</option>
-                        <option value="Independent House">Independent House</option>
-                        <option value="Studio">Studio</option>
-                        <option value="Villa">Villa</option>
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label for="furnishing">Furnishing</label>
-                    <select id="furnishing" name="furnishing" required>
-                        <option value="">Select furnishing</option>
-                        <option value="Fully Furnished">Fully Furnished</option>
-                        <option value="Semi-Furnished">Semi-Furnished</option>
-                        <option value="Unfurnished">Unfurnished</option>
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label for="floor">Floor</label>
-                    <select id="floor" name="floor" required>
-                        <option value="">Select floor</option>
-                        <option value="Ground">Ground</option>
-                        <option value="High">High</option>
-                        <option value="Low">Low</option>
-                        <option value="Middle">Middle</option>
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label for="property_age">Property Age (Years)</label>
-                    <input type="number" id="property_age" name="property_age" min="0" max="50" required />
-                </div>
-            </div>
-
-            <button type="submit">Predict Rent</button>
-        </form>
-
-        {% if error %}
-            <div class="message error">
-                {{ error }}
-            </div>
-        {% endif %}
-
-        {% if prediction is not none %}
-            <div class="result">
-                <h2>Predicted Monthly Rent</h2>
-                <p>₹ {{ prediction }}</p>
-            </div>
-        {% endif %}
+    <div class="app-background">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
     </div>
+
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>HouseRent<span class="highlight">.AI</span></h1>
+                    <p class="tagline">Linear Regression Machine Learning Model</p>
+                </div>
+            </div>
+            
+            <div class="model-badge">
+                <span class="badge-dot"></span>
+                <span class="badge-title">Algorithm: Linear Regression</span>
+                <span class="badge-pill">R²: {{ metrics.r2_score }}</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-wrapper">
+        <!-- Quick Preset Toolbar -->
+        <section class="preset-section" aria-label="Sample Property Presets">
+            <div class="preset-label">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                <span>Quick Demo Presets:</span>
+            </div>
+            <div class="preset-buttons">
+                <button type="button" class="preset-btn" data-city="Mumbai" data-bhk="2" data-size="950" data-baths="2" data-type="Apartment" data-furnishing="Semi-Furnished" data-floor="Middle" data-age="5">
+                    🏢 Mumbai 2BHK Apartment
+                </button>
+                <button type="button" class="preset-btn" data-city="Bangalore" data-bhk="3" data-size="1650" data-baths="3" data-type="Apartment" data-furnishing="Fully Furnished" data-floor="High" data-age="2">
+                    🌿 Bangalore 3BHK Luxury
+                </button>
+                <button type="button" class="preset-btn" data-city="Pune" data-bhk="1" data-size="450" data-baths="1" data-type="Studio" data-furnishing="Unfurnished" data-floor="Low" data-age="4">
+                    🏙️ Pune 1BHK Studio
+                </button>
+                <button type="button" class="preset-btn" data-city="Delhi" data-bhk="4" data-size="2600" data-baths="4" data-type="Villa" data-furnishing="Fully Furnished" data-floor="Ground" data-age="7">
+                    🏰 Delhi 4BHK Villa
+                </button>
+            </div>
+        </section>
+
+        <div class="dashboard-grid">
+            <!-- Left Column: Input Form -->
+            <section class="card form-card">
+                <div class="card-header">
+                    <div class="card-title-group">
+                        <h2>Property Configuration</h2>
+                        <p class="card-subtitle">Configure exact property features to estimate fair monthly rent</p>
+                    </div>
+                    <button type="button" id="reset-btn" class="text-btn">Reset</button>
+                </div>
+
+                <form id="prediction-form" action="/predict" method="POST">
+                    <!-- Section 1: Location & Type -->
+                    <div class="form-section">
+                        <div class="section-label">
+                            <span class="step-num">1</span>
+                            <span>Location & Property Type</span>
+                        </div>
+                        <div class="input-grid-2">
+                            <div class="form-group">
+                                <label for="city-select">City</label>
+                                <div class="select-wrapper">
+                                    <select id="city-select" name="city" required>
+                                        {% for c in cities %}
+                                        <option value="{{ c }}" {% if form_data.city == c %}selected{% endif %}>{{ c }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="property-type-select">Property Type</label>
+                                <div class="select-wrapper">
+                                    <select id="property-type-select" name="property_type" required>
+                                        {% for pt in property_types %}
+                                        <option value="{{ pt }}" {% if form_data.property_type == pt %}selected{% endif %}>{{ pt }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Space & Capacity -->
+                    <div class="form-section">
+                        <div class="section-label">
+                            <span class="step-num">2</span>
+                            <span>Rooms & Dimensions</span>
+                        </div>
+                        
+                        <!-- BHK Selection -->
+                        <div class="form-group">
+                            <div class="label-with-value">
+                                <label for="bhk-input">Bedrooms (BHK)</label>
+                                <span class="indicator-value" id="bhk-display">{{ form_data.bhk }} BHK</span>
+                            </div>
+                            <input type="hidden" id="bhk-input" name="bhk" value="{{ form_data.bhk }}">
+                            <div class="pill-group" role="radiogroup" aria-label="BHK Selection">
+                                {% for b in [1, 2, 3, 4, 5] %}
+                                <button type="button" class="pill-btn {% if form_data.bhk == b %}active{% endif %}" data-target="bhk-input" data-value="{{ b }}">
+                                    {{ b }} BHK
+                                </button>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Size in Sq.Ft -->
+                        <div class="form-group">
+                            <div class="label-with-value">
+                                <label for="size-input">Carpet / Super Area (Sq.Ft)</label>
+                                <div class="size-input-wrapper">
+                                    <input type="number" id="size-input" name="size_sqft" min="300" max="6000" step="10" value="{{ form_data.size_sqft }}" required>
+                                    <span class="unit-suffix">sq.ft</span>
+                                </div>
+                            </div>
+                            <input type="range" id="size-slider" min="350" max="4000" step="25" value="{{ form_data.size_sqft }}" class="range-slider">
+                            <div class="range-labels">
+                                <span>350 sq.ft</span>
+                                <div class="quick-size-tags">
+                                    <button type="button" class="size-tag" data-size="600">600</button>
+                                    <button type="button" class="size-tag" data-size="1000">1000</button>
+                                    <button type="button" class="size-tag" data-size="1500">1500</button>
+                                    <button type="button" class="size-tag" data-size="2200">2200</button>
+                                </div>
+                                <span>4000+ sq.ft</span>
+                            </div>
+                        </div>
+
+                        <!-- Bathrooms -->
+                        <div class="form-group">
+                            <div class="label-with-value">
+                                <label for="bathrooms-input">Bathrooms</label>
+                                <span class="indicator-value" id="bath-display">{{ form_data.bathrooms | int }} Baths</span>
+                            </div>
+                            <input type="hidden" id="bathrooms-input" name="bathrooms" value="{{ form_data.bathrooms | int }}">
+                            <div class="pill-group" role="radiogroup" aria-label="Bathroom Selection">
+                                {% for bath in [1, 2, 3, 4, 5, 6] %}
+                                <button type="button" class="pill-btn {% if form_data.bathrooms | int == bath %}active{% endif %}" data-target="bathrooms-input" data-value="{{ bath }}">
+                                    {{ bath }}
+                                </button>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Structure & Condition -->
+                    <div class="form-section">
+                        <div class="section-label">
+                            <span class="step-num">3</span>
+                            <span>Interior & Floor Placement</span>
+                        </div>
+                        <div class="input-grid-2">
+                            <div class="form-group">
+                                <label for="furnishing-select">Furnishing Status</label>
+                                <div class="select-wrapper">
+                                    <select id="furnishing-select" name="furnishing" required>
+                                        {% for fs in furnishing_statuses %}
+                                        <option value="{{ fs }}" {% if form_data.furnishing == fs %}selected{% endif %}>{{ fs }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="floor-select">Floor Level</label>
+                                <div class="select-wrapper">
+                                    <select id="floor-select" name="floor" required>
+                                        {% for fl in floor_levels %}
+                                        <option value="{{ fl }}" {% if form_data.floor == fl %}selected{% endif %}>{{ fl }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Property Age -->
+                        <div class="form-group">
+                            <div class="label-with-value">
+                                <label for="property-age-input">Property Age</label>
+                                <span class="indicator-value" id="age-display">{{ form_data.property_age }} Years</span>
+                            </div>
+                            <input type="range" id="property-age-slider" min="0" max="30" step="1" value="{{ form_data.property_age }}" class="range-slider">
+                            <input type="hidden" id="property-age-input" name="property_age" value="{{ form_data.property_age }}">
+                            <div class="range-labels">
+                                <span>Brand New (0 yrs)</span>
+                                <span>15 yrs</span>
+                                <span>30+ yrs</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="submit-btn" class="btn-primary">
+                        <span class="btn-spinner" id="btn-spinner"></span>
+                        <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        <span class="btn-text">Predict Monthly Rent</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Right Column: Results & Intelligence -->
+            <section class="card results-card" id="results-container">
+                <div class="card-header">
+                    <div class="card-title-group">
+                        <h2>Prediction Intelligence</h2>
+                        <p class="card-subtitle">Regression output calibrated from 10,000 real property instances</p>
+                    </div>
+                </div>
+
+                <!-- Main Output Value Block -->
+                <div class="prediction-box">
+                    <div class="prediction-glow"></div>
+                    <div class="prediction-content">
+                        <span class="prediction-label">ESTIMATED MONTHLY RENT</span>
+                        <div class="rent-amount-wrapper">
+                            <span class="rent-currency">₹</span>
+                            <span class="rent-value" id="predicted-rent-val">
+                                {% if prediction %}
+                                    {{ prediction.formatted_rent.replace('₹ ', '') }}
+                                {% else %}
+                                    58,450
+                                {% endif %}
+                            </span>
+                            <span class="rent-period">/ month</span>
+                        </div>
+                        <div class="estimate-meta">
+                            <span class="estimate-tag" id="confidence-tag">✓ Ordinary Least Squares Fit</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Secondary Rent Metrics -->
+                <div class="secondary-metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                        <div class="metric-info">
+                            <span class="metric-title">Annual Estimate</span>
+                            <span class="metric-val" id="annual-rent-val">
+                                {% if prediction %}{{ prediction.annual_rent }}{% else %}₹ 701,400{% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            </svg>
+                        </div>
+                        <div class="metric-info">
+                            <span class="metric-title">Rent / Sq.Ft</span>
+                            <span class="metric-val" id="sqft-rent-val">
+                                {% if prediction %}{{ prediction.rent_per_sqft }}{% else %}₹ 53.14{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Configuration Chips -->
+                <div class="config-summary">
+                    <span class="config-title">Active Parameters Evaluated:</span>
+                    <div class="chips-list" id="chips-list">
+                        <span class="chip" id="chip-city">📍 {{ form_data.city }}</span>
+                        <span class="chip" id="chip-bhk">🛏️ {{ form_data.bhk }} BHK</span>
+                        <span class="chip" id="chip-size">📐 {{ form_data.size_sqft }} sq.ft</span>
+                        <span class="chip" id="chip-baths">🚿 {{ form_data.bathrooms | int }} Baths</span>
+                        <span class="chip" id="chip-type">🏠 {{ form_data.property_type }}</span>
+                        <span class="chip" id="chip-furnishing">🛋️ {{ form_data.furnishing }}</span>
+                        <span class="chip" id="chip-floor">🏢 {{ form_data.floor }} Floor</span>
+                        <span class="chip" id="chip-age">⏳ {{ form_data.property_age }} yrs</span>
+                    </div>
+                </div>
+
+                <!-- Notebook Model Information & Metrics -->
+                <div class="model-info-card">
+                    <div class="info-card-header">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        <span>Model Provenance & Test Accuracy</span>
+                    </div>
+                    <p class="model-desc">
+                        Trained on <strong>8,000 instances</strong> using Ordinary Least Squares Linear Regression with 
+                        scikit-learn Pipeline (<code class="code-pill">StandardScaler</code> + <code class="code-pill">OneHotEncoder</code>).
+                    </p>
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <span class="stat-name">R² Score</span>
+                            <span class="stat-num highlight-stat">0.884</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-name">MAE</span>
+                            <span class="stat-num">₹ 5,510</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-name">RMSE</span>
+                            <span class="stat-num">₹ 7,013</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <p>Built with Flask & Scikit-Learn • Machine Learning House Rent Prediction • Linear Regression Algorithm</p>
+    </footer>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
