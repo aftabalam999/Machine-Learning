@@ -38,6 +38,10 @@ artifacts/
 !Projects/House Rent Prediction/models/
 !Projects/House Rent Prediction/models/**
 
+# Allow production model for Customer Churn Prediction deployment
+!Projects/Customer_Churn_Prediction/models/
+!Projects/Customer_Churn_Prediction/models/**
+
 # OS files
 .DS_Store
 Thumbs.db
