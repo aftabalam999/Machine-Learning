@@ -301,8 +301,12 @@ def load_model():
     global pipeline, preprocessor, classifier, feature_names
 
     if MODEL_PATH.exists():
-        pipeline = joblib.load(MODEL_PATH)
-        print(f"Loaded Logistic Regression model from {MODEL_PATH}")
+        try:
+            pipeline = joblib.load(MODEL_PATH)
+            print(f"Loaded Logistic Regression model from {MODEL_PATH}")
+        except Exception as e:
+            print(f"Error loading model from {MODEL_PATH}: {e}. Retraining...")
+            pipeline = train_logistic_regression()
     else:
         pipeline = train_logistic_regression()
 
