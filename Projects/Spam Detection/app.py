@@ -332,6 +332,16 @@ def api_model_info():
     })
 
 
+@app.route("/health", methods=["GET"])
+def health_check():
+    """Operational health check."""
+    return jsonify({
+        "status": "healthy",
+        "model_loaded": model is not None,
+        "algorithm": "Logistic Regression + TF-IDF",
+    })
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5001))
     print(f"Starting AegisSpam Flask Application on http://127.0.0.1:{port}")

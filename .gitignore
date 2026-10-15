@@ -42,6 +42,10 @@ artifacts/
 !Projects/Customer_Churn_Prediction/models/
 !Projects/Customer_Churn_Prediction/models/**
 
+# Allow production model for Spam Detection deployment
+!Projects/Spam Detection/models/
+!Projects/Spam Detection/models/**
+
 # OS files
 .DS_Store
 Thumbs.db
