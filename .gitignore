@@ -34,6 +34,10 @@ artifacts/
 *.h5
 *.keras
 
+# Allow production model for House Rent Prediction deployment
+!Projects/House Rent Prediction/models/
+!Projects/House Rent Prediction/models/**
+
 # OS files
 .DS_Store
 Thumbs.db
