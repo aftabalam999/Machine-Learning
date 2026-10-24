@@ -5,7 +5,6 @@ Strictly utilizes Logistic Regression with TF-IDF Vectorization.
 """
 
 import os
-import sys
 import time
 import pickle
 from pathlib import Path
