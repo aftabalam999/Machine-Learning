@@ -36,7 +36,6 @@ def train_logistic_regression():
     from sklearn.feature_extraction.text import TfidfVectorizer
     from sklearn.linear_model import LogisticRegression
 
-    print("Pickle model not found. Training Logistic Regression from dataset...")
     if not DATASET_PATH.exists():
         raise FileNotFoundError(f"Dataset not found at {DATASET_PATH}")
 

@@ -453,7 +453,7 @@ def perform_prediction(data: dict, threshold: float = 0.5):
         clean_row["SeniorCitizen"] = int(data.get("SeniorCitizen", 0))
     except (ValueError, TypeError):
         clean_row["SeniorCitizen"] = 0
-
+ 
     try:
         clean_row["tenure"] = float(data.get("tenure", 1))
     except (ValueError, TypeError):

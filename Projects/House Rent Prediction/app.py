@@ -64,7 +64,7 @@ def load_or_train_model():
 
     df = pd.read_csv(DATA_PATH)
     df.columns = df.columns.str.strip()
-    df["rent"] = pd.to_numeric(df["rent"], errors="coerce")
+    df["rent"] = pd.to_numeric(df["rent"], errors="coerce") # coerce -> NaN for invalid parsing
     df = df.dropna(subset=["rent"])
     df = df[df["rent"] > 0].copy()
 
